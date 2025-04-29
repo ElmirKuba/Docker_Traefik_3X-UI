@@ -1,26 +1,6 @@
-services:
-  3x-ui:
-    image: ghcr.io/mhsanaei/3x-ui:latest
-    container_name: 3x-ui
-    environment:
-      XRAY_VMESS_AEAD_FORCED: "false"
-      USERNAME: ${USERNAME}
-      PASSWORD: ${PASSWORD}
-      CONFIG_PORT: ${CONFIG_PORT}
-      EMAIL: ${EMAIL}
-    ports:
-      - "443:443"
-    expose:
-      - "2053"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.3x-ui.rule=Host(`aeza.elmir-kuba.ru`)"
-      - "traefik.http.routers.3x-ui.entrypoints=websecure"
-      - "traefik.http.routers.3x-ui.tls=true"
-      - "traefik.http.routers.3x-ui.tls.certresolver=myresolver"
-      - "traefik.http.services.3x-ui.loadbalancer.server.port=2053"
-    restart: unless-stopped
+version: "3.8"
 
+services:
   traefik:
     image: traefik:v2.4
     container_name: traefik
@@ -38,7 +18,28 @@ services:
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./letsencrypt:/letsencrypt"
+    restart: unless-stopped
+
+  3x-ui:
+    image: ghcr.io/mhsanaei/3x-ui:latest
+    container_name: 3x-ui
+    environment:
+      XRAY_VMESS_AEAD_FORCED: "false"
+      USERNAME: ${USERNAME}
+      PASSWORD: ${PASSWORD}
+      CONFIG_PORT: ${CONFIG_PORT}
+      EMAIL: ${EMAIL}
+    expose:
+      - "2053"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.3x-ui.rule=Host(`aeza.elmir-kuba.ru`)"
+      - "traefik.http.routers.3x-ui.entrypoints=websecure"
+      - "traefik.http.routers.3x-ui.tls=true"
+      - "traefik.http.routers.3x-ui.tls.certresolver=myresolver"
+      - "traefik.http.services.3x-ui.loadbalancer.server.port=2053"
     restart: unless-stopped
